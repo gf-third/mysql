@@ -22,12 +22,6 @@ import (
 	"database/sql/driver"
 	"net"
 	"sync"
-	"sync/atomic"
-)
-
-var (
-	// Used to make "mysql" sql/driver registered just once.
-	registered int32 = 0
 )
 
 // MySQLDriver is exported to make the driver directly accessible.
@@ -86,16 +80,6 @@ func (d MySQLDriver) Open(dsn string) (driver.Conn, error) {
 	return c.Connect(context.Background())
 }
 
-// Register registers "mysql" driver to sql/driver manually.
-// It automatically limits register just once using atomic.
-func Register() {
-	if atomic.LoadInt32(&registered) == 0 {
-		if atomic.AddInt32(&registered, 1) == 1 {
-			sql.Register("mysql", &MySQLDriver{})
-		}
-	}
-}
-
 func init() {
-	Register()
+	sql.Register("gf-mysql", &MySQLDriver{})
 }
